@@ -42,7 +42,7 @@ fn main() {
     let reader = std::io::stdin().lock();
     let mut writer = BufWriter::new(file);
 
-    let interval = chrono::Duration::seconds(10);
+    let interval = chrono::Duration::minutes(1);
 
     reader.lines().into_iter().for_each(|line| {
         let line = match line {
@@ -61,7 +61,7 @@ fn main() {
             start_time = current_time;
 
             let new_path = get_file_path(out_dir.clone(), &start_time);
-            println!("New file: {file_path:?}");
+            println!("New file: {new_path:?}");
             if move_after_close {
                 match std::fs::rename(&file_path, log_dir.join(file_path.file_name().unwrap())) {
                     Ok(..) => {
@@ -94,4 +94,17 @@ fn main() {
             }
         };
     });
+    if move_after_close {
+        match std::fs::rename(&file_path, log_dir.join(file_path.file_name().unwrap())) {
+            Ok(..) => {
+                println!(
+                    "move from {file_path:?} to {:?}",
+                    log_dir.join(file_path.file_name().unwrap())
+                );
+            }
+            Err(e) => {
+                eprintln!("Cannot move out of tmp dir: {e:?}");
+            }
+        }
+    }
 }
